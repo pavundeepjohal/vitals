@@ -313,6 +313,8 @@ function LineChart({ points, color, unit }) {
 
 // ─── CALENDAR ───
 function CalendarView({ data, habits, calMonth, setCalMonth, selectedDay, setSelectedDay, dayPanelProps, theme }) {
+  const [editingDay, setEditingDay] = useState(false);
+  useEffect(()=>{ setEditingDay(false); }, [selectedDay]);
   const {y,m}=calMonth;
   const first=new Date(y,m,1).getDay();
   const dim=new Date(y,m+1,0).getDate();
@@ -354,9 +356,17 @@ function CalendarView({ data, habits, calMonth, setCalMonth, selectedDay, setSel
       {selectedDay&&(
         <div style={S.modal}>
           <div style={{...S.modalBox, background:isLight?"#fff":"#111"}}>
-            <button style={S.closeBtn} onClick={()=>setSelectedDay(null)}>✕</button>
+            <div style={S.modalHeader}>
+              <button style={S.closeBtn} onClick={()=>{setSelectedDay(null);setEditingDay(false);}}>✕</button>
+              {selectedDay!==todayKey()&&(
+                <button style={{...S.editDayBtn, color:editingDay?"#F87171":"#6EE7B7", borderColor:editingDay?"#F87171":"#6EE7B7"}}
+                  onClick={()=>setEditingDay(e=>!e)}>
+                  {editingDay?"✕ Cancel":"✏️ Edit day"}
+                </button>
+              )}
+            </div>
             <DayPanel dayKey={selectedDay} title={selectedDay} {...dayPanelProps(selectedDay)}
-              readOnly={selectedDay!==todayKey()} theme={theme}/>
+              readOnly={selectedDay!==todayKey()&&!editingDay} theme={theme}/>
           </div>
         </div>
       )}
@@ -890,7 +900,9 @@ const S = {
   dot:             { width:6, height:6, borderRadius:"50%" },
   modal:           { position:"fixed", inset:0, background:"rgba(0,0,0,0.8)", zIndex:50, display:"flex", alignItems:"flex-end" },
   modalBox:        { background:"#111", width:"100%", maxWidth:480, margin:"0 auto", borderRadius:"20px 20px 0 0", maxHeight:"90vh", overflowY:"auto", position:"relative", paddingTop:8 },
-  closeBtn:        { position:"absolute", top:12, right:16, background:"none", border:"none", color:"#666", fontSize:20, cursor:"pointer", zIndex:1 },
+  closeBtn:        { background:"none", border:"none", color:"#666", fontSize:20, cursor:"pointer" },
+  modalHeader:     { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"12px 16px 0", position:"sticky", top:0, zIndex:5 },
+  editDayBtn:      { border:"1px solid", borderRadius:20, padding:"6px 14px", background:"none", fontSize:13, fontWeight:600, cursor:"pointer" },
   insightHeader:   { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 },
   rangeToggle:     { display:"flex", gap:6 },
   rangeBtn:        { background:"#1a1a1a", border:"1px solid #2a2a2a", borderRadius:8, padding:"4px 10px", color:"#666", fontSize:12, cursor:"pointer" },
